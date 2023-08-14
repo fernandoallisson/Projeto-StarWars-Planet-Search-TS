@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-type Planet = {
+export type PlanetType = {
   name: string;
   rotation_period: string;
   orbital_period: string;
@@ -14,10 +14,11 @@ type Planet = {
   url: string;
   created: string;
   edited: string;
+  setPlanets: (planets: PlanetType[]) => void;
 };
 
 export const PlanetsContext = createContext({
   planets: [],
 } as {
-  planets: Planet[];
+  planets: PlanetType[];
 });

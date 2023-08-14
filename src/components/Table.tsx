@@ -1,11 +1,30 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { PlanetsContext } from '../context/context';
 
 export function Table() {
   const { planets } = useContext(PlanetsContext);
+  const [planetList, setPlanetList] = useState(planets);
+
+  useEffect(() => {
+    setPlanetList(planets);
+  }, [planets]);
+
+  const filterPlanets = (event: any) => {
+    const { value } = event.target;
+    const filteredPlanets = planets.filter((planet) => planet.name.includes(value));
+    setPlanetList(filteredPlanets);
+  };
 
   return (
     <div id="table-planets">
+      {/* input para filtrar por nome */}
+      <input
+        type="text"
+        placeholder="Filtrar por nome"
+        data-testid="name-filter"
+        onChange={ filterPlanets }
+      />
+
       <table>
         <thead>
           <tr>
@@ -25,7 +44,7 @@ export function Table() {
           </tr>
         </thead>
         <tbody>
-          {planets.map((planet) => (
+          {planetList.map((planet) => (
             <tr key={ planet.name }>
               <td>{planet.name}</td>
               <td>{planet.rotation_period}</td>

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { PlanetsContext } from './context/context';
+import { PlanetType, PlanetsContext } from './context/context';
 import { fetchPlanets } from './services/index';
 
 import './App.css';
-import { Table } from './components/Table';
+import { Planets } from './pages/Planets';
 
 function App() {
-  const [planets, setPlanets] = useState([]);
+  const [planets, setPlanets] = useState<PlanetType[]>([]);
 
   const getPlanets = async () => {
     const planetsList = await fetchPlanets();
@@ -19,7 +19,7 @@ function App() {
 
   return (
     <PlanetsContext.Provider value={ { planets } }>
-      <Table />
+      <Planets />
     </PlanetsContext.Provider>
   );
 }
