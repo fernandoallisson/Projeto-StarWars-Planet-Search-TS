@@ -5,6 +5,12 @@ export function Table() {
   const { planets } = useContext(PlanetsContext);
   const [planetList, setPlanetList] = useState(planets);
 
+  const [filter, setFilter] = useState({
+    column: 'population',
+    comparison: 'maior que',
+    value: 0,
+  });
+
   useEffect(() => {
     setPlanetList(planets);
   }, [planets]);
@@ -12,6 +18,23 @@ export function Table() {
   const filterPlanets = (event: any) => {
     const { value } = event.target;
     const filteredPlanets = planets.filter((planet) => planet.name.includes(value));
+    setPlanetList(filteredPlanets);
+  };
+
+  const handleFilter = () => {
+    const { column, comparison, value } = filter;
+    const filteredPlanets = planets.filter((planet: any) => {
+      if (comparison === 'maior que') {
+        return Number(planet[column]) > value;
+      }
+      if (comparison === 'menor que') {
+        return Number(planet[column]) < value;
+      }
+      if (comparison === 'igual a') {
+        return Number(planet[column]) === value;
+      }
+      return planet;
+    });
     setPlanetList(filteredPlanets);
   };
 
@@ -24,6 +47,41 @@ export function Table() {
         data-testid="name-filter"
         onChange={ filterPlanets }
       />
+      {/* input para filtrar pelos valores númericos */}
+      <select
+        data-testid="column-filter"
+        onChange={ (event) => setFilter({ ...filter, column: event.target.value }) }
+      >
+        <option value="population">population</option>
+        <option value="orbital_period">orbital_period</option>
+        <option value="diameter">diameter</option>
+        <option value="rotation_period">rotation_period</option>
+        <option value="surface_water">surface_water</option>
+      </select>
+      <select
+        data-testid="comparison-filter"
+        onChange={ (event) => setFilter({ ...filter, comparison: event.target.value }) }
+      >
+        <option value="maior que">maior que</option>
+        <option value="menor que">menor que</option>
+        <option value="igual a">igual a</option>
+      </select>
+      <input
+        type="number"
+        placeholder="Valor"
+        defaultValue={ 0 }
+        data-testid="value-filter"
+        onChange={ (event) => (
+          setFilter({ ...filter, value: Number(event.target.value) })
+        ) }
+      />
+      <button
+        type="button"
+        data-testid="button-filter"
+        onClick={ handleFilter }
+      >
+        Filtrar
+      </button>
 
       <table>
         <thead>
