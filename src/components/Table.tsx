@@ -1,15 +1,24 @@
 import { useContext, useEffect, useState } from 'react';
 import { PlanetsContext } from '../context/context';
 
+const INITIAL_FILTER = {
+  column: 'population',
+  comparison: 'maior que',
+  value: 0,
+};
+
+type Filter = {
+  column: string,
+  comparison: string,
+  value: number,
+};
 export function Table() {
   const { planets } = useContext(PlanetsContext);
   const [planetList, setPlanetList] = useState(planets);
 
-  const [filter, setFilter] = useState({
-    column: 'population',
-    comparison: 'maior que',
-    value: 0,
-  });
+  // GUARDAR OS FILTROS NUMERICOS
+  const [listFilter, setListFilter] = useState<Filter[]>([]);
+  const [filter, setFilter] = useState<Filter>(INITIAL_FILTER);
 
   useEffect(() => {
     setPlanetList(planets);
@@ -22,20 +31,58 @@ export function Table() {
   };
 
   const handleFilter = () => {
-    const { column, comparison, value } = filter;
-    const filteredPlanets = planets.filter((planet: any) => {
-      if (comparison === 'maior que') {
-        return Number(planet[column]) > value;
-      }
-      if (comparison === 'menor que') {
-        return Number(planet[column]) < value;
-      }
-      if (comparison === 'igual a') {
-        return Number(planet[column]) === value;
-      }
-      return planet;
+    const newFilterList = [...listFilter, filter];
+
+    // Aplique os filtros remanescentes à lista de planetas
+    let filteredPlanets = planets;
+    newFilterList.forEach((item) => {
+      filteredPlanets = filteredPlanets.filter((planet: any) => {
+        if (item.comparison === 'maior que') {
+          return Number(planet[item.column]) > item.value;
+        }
+        if (item.comparison === 'menor que') {
+          return Number(planet[item.column]) < item.value;
+        }
+        if (item.comparison === 'igual a') {
+          return Number(planet[item.column]) === item.value;
+        }
+        return true;
+      });
     });
+
+    if (newFilterList.length === 0) {
+      filteredPlanets = planets;
+    }
     setPlanetList(filteredPlanets);
+    setListFilter(newFilterList);
+  };
+
+  const hanleClickCleanFilter = (item: Filter) => {
+    const newFilterList = listFilter.filter((filterItem) => (
+      filterItem.column !== item.column
+      || filterItem.comparison !== item.comparison
+      || filterItem.value !== item.value
+    ));
+
+    // Aplique os filtros remanescentes à lista de planetas
+    let filteredPlanets = planets;
+    newFilterList.forEach((filterItem) => {
+      filteredPlanets = filteredPlanets.filter((planet: any) => {
+        if (filterItem.comparison === 'maior que') {
+          return Number(planet[filterItem.column]) > Number(filterItem.value);
+        }
+        if (filterItem.comparison === 'menor que') {
+          return Number(planet[filterItem.column]) < Number(filterItem.value);
+        }
+        if (filterItem.comparison === 'igual a') {
+          return Number(planet[filterItem.column]) === Number(filterItem.value);
+        }
+        return true;
+      });
+    });
+
+    setPlanetList(filteredPlanets);
+    setListFilter(newFilterList);
   };
 
   return (
@@ -71,8 +118,8 @@ export function Table() {
         placeholder="Valor"
         defaultValue={ 0 }
         data-testid="value-filter"
-        onChange={ (event) => (
-          setFilter({ ...filter, value: Number(event.target.value) })
+        onChange={ (event) => setFilter(
+          { ...filter, value: Number(event.target.value) },
         ) }
       />
       <button
@@ -82,6 +129,22 @@ export function Table() {
       >
         Filtrar
       </button>
+
+      {/* Listagem de filtros numericos filtrados com botão para apagar que deve remover o item também */}
+      <h2>Filtros</h2>
+      <div>
+        {listFilter.map((item) => (
+          <div key={ item.column }>
+            <span>{`${item.column} ${item.comparison} ${item.value}`}</span>
+            <button
+              type="button"
+              onClick={ () => hanleClickCleanFilter(item) }
+            >
+              🗑️
+            </button>
+          </div>
+        ))}
+      </div>
 
       <table>
         <thead>
