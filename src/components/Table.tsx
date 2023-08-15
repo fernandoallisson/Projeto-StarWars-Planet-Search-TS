@@ -64,7 +64,6 @@ export function Table() {
       || filterItem.value !== item.value
     ));
 
-    // Aplique os filtros remanescentes à lista de planetas
     let filteredPlanets = planets;
     newFilterList.forEach((filterItem) => {
       filteredPlanets = filteredPlanets.filter((planet: any) => {

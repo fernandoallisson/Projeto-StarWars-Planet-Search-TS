@@ -14,7 +14,6 @@ export type PlanetType = {
   url: string;
   created: string;
   edited: string;
-  setPlanets: (planets: PlanetType[]) => void;
 };
 
 export const PlanetsContext = createContext({
