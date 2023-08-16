@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { PlanetsContext } from '../context/context';
+import { FilterContext, PlanetsContext } from '../context/context';
 
 const INITIAL_FILTER = {
   column: 'population',
@@ -13,16 +13,32 @@ type Filter = {
   value: number,
 };
 export function Table() {
+  // Contexts
   const { planets } = useContext(PlanetsContext);
-  const [planetList, setPlanetList] = useState(planets);
+  const { filtersColumn } = useContext(FilterContext);
 
-  // GUARDAR OS FILTROS NUMERICOS
-  const [listFilter, setListFilter] = useState<Filter[]>([]);
-  const [filter, setFilter] = useState<Filter>(INITIAL_FILTER);
+  // UseStates
+  const [planetList, setPlanetList] = useState(planets); // Lista de planetas
+  const [listFilter, setListFilter] = useState<Filter[]>([]); // Lista de filtros
+  const [filter, setFilter] = useState<Filter>(INITIAL_FILTER); // Filtro atual
+  const [filterColumn, setFilterColumn] = useState<string[]>([]); // Colunas que podem ser filtradas
 
   useEffect(() => {
     setPlanetList(planets);
   }, [planets]);
+
+  useEffect(() => {
+    // Adicionar apenas as colunas que podem ser filtradas que não estão no listFilter.column
+    if (listFilter) {
+      const aplicabledFilters = listFilter.map((item) => item.column);
+      const newFilterColumn = filtersColumn.filter((item) => (
+        !aplicabledFilters.includes(item)
+      ));
+      setFilterColumn(newFilterColumn);
+    } else {
+      setFilterColumn(filtersColumn);
+    }
+  }, [filtersColumn, listFilter, filter]);
 
   const filterPlanets = (event: any) => {
     const { value } = event.target;
@@ -55,6 +71,8 @@ export function Table() {
     }
     setPlanetList(filteredPlanets);
     setListFilter(newFilterList);
+
+    // Se na listFilter tiver algum item com o mesmo column, deve ser removido
   };
 
   const hanleClickCleanFilter = (item: Filter) => {
@@ -84,8 +102,16 @@ export function Table() {
     setListFilter(newFilterList);
   };
 
+  const handleTest = () => {
+    console.log(planetList);
+    console.log(listFilter);
+    console.log(filter);
+    console.log(filterColumn);
+  };
+
   return (
     <div id="table-planets">
+      <button onClick={ handleTest }>Test</button>
       {/* input para filtrar por nome */}
       <input
         type="text"
@@ -98,11 +124,9 @@ export function Table() {
         data-testid="column-filter"
         onChange={ (event) => setFilter({ ...filter, column: event.target.value }) }
       >
-        <option value="population">population</option>
-        <option value="orbital_period">orbital_period</option>
-        <option value="diameter">diameter</option>
-        <option value="rotation_period">rotation_period</option>
-        <option value="surface_water">surface_water</option>
+        {filterColumn.map((item) => (
+          <option key={ item } value={ item }>{item}</option>
+        ))}
       </select>
       <select
         data-testid="comparison-filter"
