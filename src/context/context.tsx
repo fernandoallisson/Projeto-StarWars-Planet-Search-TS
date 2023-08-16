@@ -16,26 +16,8 @@ export type PlanetType = {
   edited: string;
 };
 
-const filters = [
-  'population',
-  'orbital_period',
-  'diameter',
-  'rotation_period',
-  'surface_water',
-];
-
 export const PlanetsContext = createContext({
   planets: [],
 } as {
   planets: PlanetType[];
-});
-
-export const FilterContext = createContext({
-  filtersColumn: filters,
-  setFilters: (filter: string[]) => {
-    return filter;
-  },
-} as {
-  filtersColumn: string[];
-  setFilters: (filter: string[]) => void;
 });

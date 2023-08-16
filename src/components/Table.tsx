@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { FilterContext, PlanetsContext } from '../context/context';
+import { PlanetsContext } from '../context/context';
 
 const INITIAL_FILTER = {
   column: 'population',
@@ -12,33 +12,45 @@ type Filter = {
   comparison: string,
   value: number,
 };
+
+const filters = [
+  'population',
+  'orbital_period',
+  'diameter',
+  'rotation_period',
+  'surface_water',
+];
+
 export function Table() {
   // Contexts
   const { planets } = useContext(PlanetsContext);
-  const { filtersColumn } = useContext(FilterContext);
 
   // UseStates
   const [planetList, setPlanetList] = useState(planets); // Lista de planetas
   const [listFilter, setListFilter] = useState<Filter[]>([]); // Lista de filtros
   const [filter, setFilter] = useState<Filter>(INITIAL_FILTER); // Filtro atual
-  const [filterColumn, setFilterColumn] = useState<string[]>([]); // Colunas que podem ser filtradas
+  const [filterColumn, setFilterColumn] = useState<string[]>(filters); // Colunas que podem ser filtradas
 
   useEffect(() => {
     setPlanetList(planets);
   }, [planets]);
 
   useEffect(() => {
-    // Adicionar apenas as colunas que podem ser filtradas que não estão no listFilter.column
     if (listFilter) {
       const aplicabledFilters = listFilter.map((item) => item.column);
-      const newFilterColumn = filtersColumn.filter((item) => (
+      const newFilterColumn = filters.filter((item) => (
         !aplicabledFilters.includes(item)
       ));
       setFilterColumn(newFilterColumn);
+      setFilter({
+        ...filter,
+        column: newFilterColumn[0],
+      });
     } else {
-      setFilterColumn(filtersColumn);
+      setFilterColumn(filters);
     }
-  }, [filtersColumn, listFilter, filter]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listFilter]);
 
   const filterPlanets = (event: any) => {
     const { value } = event.target;
@@ -71,8 +83,6 @@ export function Table() {
     }
     setPlanetList(filteredPlanets);
     setListFilter(newFilterList);
-
-    // Se na listFilter tiver algum item com o mesmo column, deve ser removido
   };
 
   const hanleClickCleanFilter = (item: Filter) => {
@@ -152,12 +162,22 @@ export function Table() {
       >
         Filtrar
       </button>
+      <button
+        data-testid="button-remove-filters"
+        type="button"
+        onClick={ () => {
+          setPlanetList(planets);
+          setListFilter([]);
+        } }
+      >
+        Remover todas filtragens
+      </button>
 
       {/* Listagem de filtros numericos filtrados com botão para apagar que deve remover o item também */}
       <h2>Filtros</h2>
       <div>
         {listFilter.map((item) => (
-          <div key={ item.column }>
+          <div key={ item.column } data-testid="filter">
             <span>{`${item.column} ${item.comparison} ${item.value}`}</span>
             <button
               type="button"
